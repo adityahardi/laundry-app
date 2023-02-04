@@ -18,6 +18,11 @@
                 'icon' => 'fas fa-users',
                 'active' => ['member.index', 'member.create', 'member.edit'],
             ]"/>
+            <x-nav-item :href="route('transaksi.index')" :title="[
+                'name' => 'Transaksi',
+                'icon' => 'fas fa-cash-register',
+                'active' => ['transaksi.index', 'transaksi.create', 'transaksi.detail'],
+            ]"/>
             @endcan
             @can('admin')
                 <x-nav-item :href="route('user.index')" :title="[
@@ -36,6 +41,11 @@
                     'active' => ['paket.index', 'paket.create', 'paket.edit'],
                 ]"/>
             @endcan
+            <x-nav-item :href="route('laporan.index')" :title="[
+                    'name' => 'Laporan',
+                    'icon' => 'fas fa-print',
+                    'active' => ['laporan.index', 'laporan.create', 'laporan.edit'],
+            ]"/>
         </nav>
     </div>
 </aside>
