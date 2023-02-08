@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LogActivity;
 use Illuminate\Http\Request;
 use App\Models\Member;
 use App\Models\Outlet;
@@ -27,7 +28,7 @@ class TransaksiController extends Controller
         ->join('outlets', 'outlets.id', 'users.outlet_id')
         ->where('members.nama', 'like', "%{$search}%")
         ->when($outlet_id, function($query, $outlet_id) {
-            return $query->where('transaksis.outlets.id', $outlet_id);
+            return $query->where('transaksis.outlet_id', $outlet_id);
         })
         ->select(
             'transaksis.id as id',
@@ -60,6 +61,7 @@ class TransaksiController extends Controller
 
     public function create(Request $request, Member $member)
     {
+
         $user = Auth::user();
         $outlet = Outlet::find($user->outlet_id);
         $pakets = Paket::where('outlet_id', $outlet->id)
@@ -89,7 +91,7 @@ class TransaksiController extends Controller
             'id' => $paket->id,
             'name' => $paket->nama_paket,
             'price' => $paket->harga,
-            'quantity' => 1,
+            'quantity' => $request->quantity,
             'attributes' => [
                 'keterangan' => $request->keterangan,
             ]
@@ -183,6 +185,10 @@ class TransaksiController extends Controller
             ]);
         }
 
+        LogActivity::add('Transaksi baru dengan invoice :' . $invoice);
+
+        Cart::session($member->id)->clear();
+
         return redirect()->route('transaksi.detail', ['transaksi' => $transaksi->id]);
     }
 
@@ -247,6 +253,8 @@ class TransaksiController extends Controller
             'dibayar' => $uang_tunai ? 'dibayar' : 'belum_dibayar',
         ];
 
+        LogActivity::add('Update transaksi dengan invoice : ' . $transaksi->kode_invoice);
+
         $transaksi->update($query_transaksi);
 
         return back()->with('message', 'success update');
@@ -257,6 +265,8 @@ class TransaksiController extends Controller
         $transaksi->update([
             'status' => $status,
         ]);
+
+        LogActivity::add('Update status transaksi ke status ' . $status. ',', ' Kode invoice : ' . $transaksi->kode_invoice);
 
         return back()->with('message', 'success update');
     }
