@@ -53,6 +53,7 @@ Route::middleware('auth')->group(function() {
         Route::put('transaksi/{transaksi}', [TransaksiController::class, 'update'])->name('transaksi.update');
         Route::get('transaksi/{transaksi}/status/{status}', [TransaksiController::class, 'status'])->name('transaksi.status');
         Route::get('transaksi/{transaksi}/invoice', [TransaksiController::class, 'invoice'])->name('transaksi.invoice');
+        Route::get('transaksi/member/{member}/paket/{paket}/{type}/update', [TransaksiController::class, 'qUpdate'])->name('transaksi.qUpdate');
     });
 
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
