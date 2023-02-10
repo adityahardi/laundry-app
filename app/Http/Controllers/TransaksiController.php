@@ -203,7 +203,7 @@ class TransaksiController extends Controller
                 'qty',
                 'transaksi_details.harga as harga',
                 'sub_total',
-                'keterangan'
+                'keterangan',
             )
             ->get();
 
@@ -258,8 +258,9 @@ class TransaksiController extends Controller
         return back()->with('message', 'success update');
     }
 
-    public function qUpdate($paket, $member, $type)
+    public function qUpdate($member, $paket, $type)
     {
+
         $member = Cart::session($member);
 
         if (!$member->get($paket)) {
@@ -320,13 +321,24 @@ class TransaksiController extends Controller
 
     public function status(Transaksi $transaksi, $status)
     {
-        $transaksi->update([
-            'status' => $status,
-        ]);
 
-        LogActivity::add('mengupdate status transaksi ke status ' . $status . '.' . ' Invoice : ' . $transaksi->kode_invoice);
+        $allowedValues = ['baru', 'proses', 'selesai', 'diambil'];
 
-        return back()->with('message', 'success update');
+        if (!in_array($status, $allowedValues)) {
+            return back()->with('message', 'fail store');
+        }
+
+        if ($transaksi->status == 'diambil') {
+            return back()->with('message', 'fail store');
+        } else {
+            $transaksi->update([
+                'status' => $status,
+            ]);
+            LogActivity::add('mengupdate status transaksi ke status ' . $status . '.' . ' Invoice : ' . $transaksi->kode_invoice);
+
+            return back()->with('message', 'success update');
+        }
+
     }
 
     public function invoice(Transaksi $transaksi)
