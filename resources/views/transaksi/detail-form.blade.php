@@ -66,6 +66,7 @@
                 <div class="col form-inline">
                     <a href="{{ route('transaksi.index') }}" class="btn btn-default mr-2">Kembali</a>
                     <div class="dropdown">
+                        @if ($transaksi->status == 'proses' || $transaksi->status == 'selesai' || $transaksi->status == 'baru')
                         <button class="btn btn-success dropdown-toggle" type="button" data-toggle="dropdown">
                             Pilih Status Menjadi
                         </button>
@@ -84,6 +85,7 @@
                                     </a>
                                 @endforeach
                         </div>
+                        @endif
                     </div>
                 </div>
                 <div class="col">

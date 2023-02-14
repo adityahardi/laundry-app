@@ -5,6 +5,9 @@
         @if (session('message') == 'success update')
             <x-alert-success type="update" />
         @endif
+        @if (session('message') == 'fail store')
+            <x-alert-danger />
+        @endif
         <div class="card card-outline card-primary">
             <div class="card-header">
                 <div class="row">

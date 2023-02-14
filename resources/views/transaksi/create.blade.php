@@ -24,7 +24,7 @@
                                 <div class="col">
                                     <x-select-transaksi
                                         name="paket"
-                                        :data-option="$pakets"
+                                        :data-option="$pakets" required
                                     />
                                 </div>
                             </div>
@@ -32,7 +32,7 @@
                                 <label class="col">Quantity </label>
                                 <div class="col">
                                     <x-input-transaksi
-                                        name="quantity"
+                                        name="quantity" type="number" required
                                     />
                                 </div>
                             </div>
@@ -40,7 +40,7 @@
                                 <label class="col">Keterangan </label>
                                 <div class="col">
                                     <x-textarea-transaksi
-                                        name="keterangan"
+                                        name="keterangan" required
                                     />
                                 </div>
                             </div>
@@ -81,6 +81,14 @@
                                 </td>
                                 <td>{{ $item->attributes->keterangan }}</td>
                                 <td>
+                                    <a href="{{ route('transaksi.qUpdate', ['member' => $member->id ,'paket' => $item->id, 'type' => 'plus']) }}"
+                                        class="btn p-0 text-primary">
+                                        <i class="fas fa-plus-square"></i>
+                                    </a>
+                                    <a href="{{ route('transaksi.qUpdate', ['member' => $member->id ,'paket' => $item->id, 'type' => 'min']) }}"
+                                        class="btn p-0 text-warning">
+                                        <i class="fas fa-minus-square"></i>
+                                    </a>
                                     <a href="{{ route('transaksi.delete', ['member' => $member->id, 'paket' => $item->id]) }}"
                                         class="btn p-0 text-danger">
                                         <i class="fas fa-trash"></i>
@@ -110,7 +118,7 @@
                         <div class="form-group row">
                             <label class="col">Batas Waktu</label>
                             <div class="col">
-                                <x-input-transaksi name="batas_waktu" type="datetime-local" />
+                                <x-input-transaksi name="batas_waktu" type="datetime-local" required />
                             </div>
                         </div>
                     </div>

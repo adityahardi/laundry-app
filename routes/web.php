@@ -10,6 +10,7 @@ use App\Http\Controllers\PaketController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\LogActivityController;
 
 /*
 |--------------------------------------------------------------------------
@@ -52,9 +53,19 @@ Route::middleware('auth')->group(function() {
         Route::put('transaksi/{transaksi}', [TransaksiController::class, 'update'])->name('transaksi.update');
         Route::get('transaksi/{transaksi}/status/{status}', [TransaksiController::class, 'status'])->name('transaksi.status');
         Route::get('transaksi/{transaksi}/invoice', [TransaksiController::class, 'invoice'])->name('transaksi.invoice');
+        Route::get('transaksi/member/{member}/paket/{paket}/{type}/update', [TransaksiController::class, 'qUpdate'])->name('transaksi.qUpdate');
     });
 
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
     Route::get('/laporan/harian', [LaporanController::class, 'harian'])->name('laporan.harian');
     Route::get('/laporan/perbulan', [LaporanController::class, 'perbulan'])->name('laporan.perbulan');
+
+    Route::middleware('can:admin')->group(function() {
+        Route::get('/log-activity', [LogActivityController::class, 'index'])->name('log.index');
+        Route::delete('/log-activity/clear', [LogActivityController::class, 'clear'])->name('log.clear');
+    });
+
+    Route::middleware('can:admin-owner')->group(function() {
+        Route::get('/log-activity', [LogActivityController::class, 'index'])->name('log.index');
+    });
 });

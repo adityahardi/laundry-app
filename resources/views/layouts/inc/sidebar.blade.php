@@ -46,6 +46,13 @@
                     'icon' => 'fas fa-print',
                     'active' => ['laporan.index', 'laporan.create', 'laporan.edit'],
             ]"/>
+            @can('admin-owner')
+                <x-nav-item :href="route('log.index')" :title="[
+                    'name' => 'Log',
+                    'icon' => 'fas fa-shoe-prints',
+                    'active' => ['log.index'],
+                ]"/>
+            @endcan
         </nav>
     </div>
 </aside>

@@ -30,16 +30,24 @@ class DatabaseSeeder extends Seeder
 
         Db::table('users')->insert([
             [
-                'nama' => 'Administator',
+                'nama' => 'Rusdi',
                 'username' => 'admin',
                 'password' => bcrypt('admin'),
                 'role' => 'admin',
                 'outlet_id' => 1,
             ],
             [
-                'nama' => 'Kasir',
+                'nama' => 'Rehan',
                 'username' => 'kasir',
                 'password' => bcrypt('kasir'),
+                'role' => 'kasir',
+                'outlet_id' => 1,
+            ],
+
+            [
+                'nama' => 'Bajigur',
+                'username' => 'owner',
+                'password' => bcrypt('owner'),
                 'role' => 'owner',
                 'outlet_id' => 1,
             ]
