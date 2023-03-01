@@ -15,13 +15,16 @@ class DashboardController extends Controller
     public function index()
     {
         $auth = Auth::user();
-        $outlet_id = $auth->level == 'kasir' ? $auth->outlet_id : null;
+        $outlet_id = $auth->role == 'kasir' ? $auth->outlet_id : null;
 
         $user = User::select(DB::raw('count(id) as jumlah'))->first();
         $member = Member::select(DB::raw('count(id) as jumlah'))->first();
         $outlet = Outlet::select(DB::raw('count(id) as jumlah'))->first();
 
         $transaksi = Transaksi::where('dibayar', 'belum_dibayar')
+            ->when($outlet_id, function ($query, $outlet_id) {
+                return $query->where('outlet_id', $outlet_id);
+            })
             ->select(DB::raw('count(id) as jumlah'))->first();
 
         $charts = Transaksi::where('dibayar', 'dibayar')

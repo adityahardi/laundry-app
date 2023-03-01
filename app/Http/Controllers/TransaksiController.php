@@ -30,6 +30,7 @@ class TransaksiController extends Controller
             ->when($outlet_id, function ($query, $outlet_id) {
                 return $query->where('transaksis.outlet_id', $outlet_id);
             })
+            ->orderBy('tgl', 'DESC')
             ->select(
                 'transaksis.id as id',
                 'members.nama as nama',
