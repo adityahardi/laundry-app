@@ -14,7 +14,7 @@
                         <i class="fas fa-trash mr-2"></i> Bersihkan Semua Log Aktifitas
                     </button>
                 @endcan
-                <x-search />
+                <x-form-search name="nama" />
             </div>
             <div class="card-body p-0">
                 <table class="table table-hover table-striped m-0">
@@ -54,7 +54,7 @@
                 </table>
             </div>
             <div class="card-footer pb-0 text-right">
-                {{ $data->appends(['nama' => request()->nama])->links('page') }}
+                {{ $data->links('page') }}
             </div>
         </div>
     </x-content>

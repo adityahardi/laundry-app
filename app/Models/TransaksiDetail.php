@@ -15,6 +15,7 @@ class TransaksiDetail extends Model
         'transaksi_id',
         'paket_id',
         'harga',
+        'diskon_paket',
         'qty',
         'sub_total',
         'keterangan',

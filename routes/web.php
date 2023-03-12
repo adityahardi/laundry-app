@@ -11,6 +11,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LogActivityController;
+use App\Http\Controllers\TambahanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,10 +40,11 @@ Route::middleware('auth')->group(function() {
         Route::resource('user', UserController::class);
         Route::resource('outlet', OutletController::class);
         Route::resource('paket', PaketController::class);
-        Route::resource('member', MemberController::class);
+        Route::resource('tambahan', TambahanController::class);
     });
 
     Route::middleware('can:admin-kasir')->group(function() {
+        Route::resource('member', MemberController::class);
         Route::get('transaksi', [TransaksiController::class, 'index'])->name('transaksi.index');
         Route::get('transaksi/member/{member}', [TransaksiController::class, 'create'])->name('transaksi.create');
         Route::post('transaksi/member/{member}/add', [TransaksiController::class, 'add'])->name('transaksi.add');

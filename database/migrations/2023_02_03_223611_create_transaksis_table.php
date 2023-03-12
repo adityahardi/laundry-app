@@ -36,7 +36,7 @@ return new class extends Migration
             $table->integer('total_bayar');
             $table->integer('cash')->nullable();
             $table->integer('kembalian')->nullable();
-            $table->enum('status', ['baru', 'proses', 'selesai', 'diambil']);
+            $table->enum('status', ['baru', 'proses', 'selesai', 'diambil', 'batal']);
             $table->enum('dibayar', ['dibayar', 'belum_dibayar']);
         });
     }

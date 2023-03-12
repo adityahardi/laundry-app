@@ -20,6 +20,7 @@ class Transaksi extends Model
         'batas_waktu',
         'tgl_bayar',
         'biaya_tambahan',
+        'diskon_paket',
         'diskon',
         'pajak',
         'sub_total',
@@ -29,5 +30,7 @@ class Transaksi extends Model
         'kembalian',
         'status',
         'dibayar',
+        'tgl_diambil',
+        'tgl_selesai'
     ];
 }

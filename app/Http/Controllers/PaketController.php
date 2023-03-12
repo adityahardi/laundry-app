@@ -25,6 +25,8 @@ class PaketController extends Controller
                 'nama_paket',
                 'harga',
                 'jenis',
+                'diskon',
+                'harga_akhir',
                 'outlets.nama as outlet'
             )
             ->paginate();
@@ -44,6 +46,8 @@ class PaketController extends Controller
         $pakets->map(function ($row) use ($jenis) {
             $row->jenis = $jenis[$row->jenis];
             $row->harga = number_format($row->harga, 0, ',', '.');
+            $row->diskon = number_format($row->diskon, 0, ',', '.');
+                $row->harga_akhir = number_format($row->harga_akhir, 0, ',', '.');
             return $row;
         });
 
@@ -75,8 +79,10 @@ class PaketController extends Controller
     {
         $request->validate([
             'nama_paket' => 'required|max:100',
-            'harga' => 'required|numeric',
+            'harga' => 'required|numeric|min:0',
             'jenis' => 'required|in:kiloan,kaos,bed_cover,selimut,lain',
+            'diskon' => 'nullable|numeric|min:0|',
+            'harga_akhir' => 'required|numeric|min:0|',
             'outlet_id' => 'required|exists:outlets,id',
         ], [], [
             'outlet_id' => 'Outlet',
@@ -124,8 +130,10 @@ class PaketController extends Controller
     {
         $request->validate([
             'nama_paket' => 'required|max:100',
-            'harga' => 'required|numeric',
+            'harga' => 'required|numeric|min:0',
             'jenis' => 'required|in:kiloan,kaos,bed_cover,selimut,lain',
+            'diskon' => 'nullable|numeric|min:0|',
+            'harga_akhir' => 'required|numeric|min:0|',
             'outlet_id' => 'required|exists:outlets,id',
         ], [], [
             'outlet_id' => 'Outlet',

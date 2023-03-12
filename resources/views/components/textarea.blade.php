@@ -6,11 +6,7 @@
     @endphp
 
     <textarea name="{{ $name }}"
-        {{ $attributes->merge([
-            'class' => 'form-control form-control-sm'.$is_invalid
-        ]) }}>
-        <?= old($name, $value)  ?>
-    </textarea>
+        {{ $attributes->merge(['class' => 'form-control form-control-sm'.$is_invalid]) }}><?= old($name, $value)  ?></textarea>
     @error($name)
     <div class="invalid-feedback">
         {{ $message }}

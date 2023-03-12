@@ -1,18 +1,13 @@
 @props(['name' => null, 'value' => null])
 <div class="form-group">
     @php
-        $is_invalid = $errors->has($name) ? ' is-invalid':'';
+        $is_invalid = $errors->has($name) ? ' is-invalid' : '';
     @endphp
 
-    <textarea name="{{ $name }}"
-        {{ $attributes->merge([
-            'class' => 'form-control'.$is_invalid
-        ]) }}>
-        <?= old($name, $value)  ?>
-    </textarea>
+    <textarea name="{{ $name }}" {{ $attributes->merge(['class' => 'form-control' . $is_invalid, ]) }}> <?= old($name, $value) ?></textarea>
     @error($name)
-    <div class="invalid-feedback">
-        {{ $message }}
-    </div>
+        <div class="invalid-feedback">
+            {{ $message }}
+        </div>
     @enderror
 </div>

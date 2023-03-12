@@ -62,9 +62,13 @@ class LaporanController extends Controller
             'members.nama as nama',
             'users.nama as kasir',
             'total_bayar',
-            'tgl'
+            'tgl',
+            'tgl_bayar',
+            'batas_waktu',
         )
         ->get();
+
+        // return $data;
 
         return view('laporan.harian', [
             'data' => $data,

@@ -5,19 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Paket extends Model
+class TambahanDetail extends Model
 {
-
     use HasFactory;
 
     public $timestamps = false;
-
-    protected $fillable = [
-        'nama_paket',
-        'harga',
-        'jenis',
-        'diskon',
-        'harga_akhir',
-        'outlet_id',
-    ];
+    protected $guarded = ['id'];
 }

@@ -7,10 +7,14 @@ use Illuminate\Http\Request;
 use App\Models\Member;
 use App\Models\Outlet;
 use App\Models\Paket;
+use App\Models\Tambahan;
+use App\Models\TambahanDetail;
 use App\Models\Transaksi;
 use App\Models\TransaksiDetail;
 use App\Models\User;
 use Auth;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Cart;
 
 class TransaksiController extends Controller
@@ -30,6 +34,7 @@ class TransaksiController extends Controller
             ->when($outlet_id, function ($query, $outlet_id) {
                 return $query->where('transaksis.outlet_id', $outlet_id);
             })
+            ->orderBy('tgl', 'DESC')
             ->select(
                 'transaksis.id as id',
                 'members.nama as nama',
@@ -64,15 +69,39 @@ class TransaksiController extends Controller
         $user = Auth::user();
         $outlet = Outlet::find($user->outlet_id);
         $pakets = Paket::where('outlet_id', $outlet->id)
-            ->select('id as value', 'nama_paket as option')->get();
+            ->select('id as value', DB::raw("CONCAT(nama_paket, ' - Rp ', harga) as option"))
+            ->get();
+        $tambahans = Tambahan::where('tambahans.outlet_id', $outlet->id)
+            ->select('tambahans.id as value', DB::raw("CONCAT(tambahans.nama, ' - Rp ', tambahans.harga) as option"))
+            ->distinct()
+            ->get();
+
         $items = Cart::session($member->id)->getContent();
+
+        // $total = Cart::session($member->id)->getTotal();
+
+        // $diskon = 0;
+        // foreach ($items as $item) {
+        //     $totalQPrice = $item->quantity * $item->price;
+        //     $totalQDiscount = $item->quantity * $item->attributes->diskon;
+        //     $subTotalDiscount = $totalQPrice - $totalQDiscount;
+        //     $qty = $item->quantity;
+        //     $diskon += $qty * ($item->attributes->diskon ?? 0);
+        //     $item->subTotalDiscount = $subTotalDiscount;
+        // }
+
+        $subTotal = Cart::session($member->id)->getTotal();
+        // $getDiscountTotal = Cart::session($member->id)->getTotal() - $subTotal;
+
+        // return $items;
 
         return view('transaksi.create', [
             'member' => $member,
             'outlet' => $outlet,
             'pakets' => $pakets,
+            'tambahans' => $tambahans,
             'items' => $items,
-            'total' => Cart::session($member->id)->getTotal(),
+            'total' => $subTotal,
         ]);
     }
 
@@ -80,7 +109,7 @@ class TransaksiController extends Controller
     {
         $request->validate([
             'paket' => 'required|exists:pakets,id',
-            'quantity' => 'required|numeric',
+            'quantity' => 'required|numeric|min:1',
             'keterangan' => 'nullable|max:200',
         ]);
 
@@ -89,12 +118,15 @@ class TransaksiController extends Controller
         Cart::session($member->id)->add(array(
             'id' => $paket->id,
             'name' => $paket->nama_paket,
-            'price' => $paket->harga,
+            'price' => $paket->harga_akhir,
             'quantity' => $request->quantity,
             'attributes' => [
+                'harga_awal' => $paket->harga,
                 'keterangan' => $request->keterangan,
+                'diskon' => $paket->diskon,
             ]
         ));
+
         return back();
     }
 
@@ -113,9 +145,9 @@ class TransaksiController extends Controller
     public function store(Request $request, Member $member)
     {
         $request->validate([
-            'batas_waktu' => 'required|after:now',
+            'batas_waktu' => 'required|after:' . Carbon::now()->addHours(3)->toDateTimeString(),
             'diskon' => 'nullable|numeric',
-            'biaya_tambahan' => 'nullable|numeric',
+            'biaya_tambahan' => 'nullable|',
             'uang_tunai' => 'nullable|numeric',
         ]);
 
@@ -127,8 +159,15 @@ class TransaksiController extends Controller
 
         $subtotal = Cart::session($member->id)->getTotal();
         $diskon = $request->diskon;
-        $biaya_tambahan = $request->biaya_tambahan;
-        $total = $subtotal - $diskon + $biaya_tambahan;
+        $biaya_tambahan_ids = $request->biaya_tambahan;
+        $biaya_tambahan_harga = 0;
+
+        if ($biaya_tambahan_ids) {
+            foreach ($biaya_tambahan_ids as $biaya_tambahan_id) {
+                $biaya_tambahan_harga += Tambahan::find($biaya_tambahan_id)->harga;
+            }
+        }
+        $total = $subtotal - $diskon + $biaya_tambahan_harga;
         $pajak = round($total * 10 / 100);
         $total_bayar = $total + $pajak;
         $uang_tunai = $request->uang_tunai;
@@ -156,7 +195,7 @@ class TransaksiController extends Controller
             'tgl' => date('Y-m-d H:i:s'),
             'batas_waktu' => date('Y-m-d H:i:s', strtotime($request->batas_waktu)),
             'tgl_bayar' => $uang_tunai ? date('Y-m-d H:i:s') : null,
-            'biaya_tambahan' => $biaya_tambahan,
+            'biaya_tambahan' => $biaya_tambahan_harga,
             'diskon' => $diskon,
             'pajak' => $pajak,
             'sub_total' => $subtotal,
@@ -176,7 +215,8 @@ class TransaksiController extends Controller
             TransaksiDetail::create([
                 'transaksi_id' => $transaksi->id,
                 'paket_id' => $item->id,
-                'harga' => $item->price,
+                'harga' => $item->attributes->harga_awal,
+                'diskon_paket' => $item->attributes->diskon,
                 'qty' => $item->quantity,
                 'sub_total' => $item->price * $item->quantity,
                 'keterangan' => $item->attributes->keterangan,
@@ -184,6 +224,17 @@ class TransaksiController extends Controller
         }
 
         LogActivity::add('membuat transaksi baru. invoice :' . $invoice);
+
+        $tambahan_ids = $request->biaya_tambahan;
+
+        if ($tambahan_ids) {
+            foreach ($tambahan_ids as $tambahan_id) {
+                TambahanDetail::create([
+                    'transaksi_id' => $transaksi->id,
+                    'tambahan_id' => $tambahan_id,
+                ]);
+            }
+        }
 
         Cart::session($member->id)->clear();
 
@@ -195,6 +246,9 @@ class TransaksiController extends Controller
         $user = User::find($transaksi->user_id);
         $member = Member::find($transaksi->member_id);
         $outlet = Outlet::find($transaksi->outlet_id);
+        $tambahans = Tambahan::where('outlet_id', $outlet->id)
+            ->select('id as value', DB::raw("CONCAT(nama, ' - Rp ', harga) as option"))
+            ->get();
         $items = TransaksiDetail::join('pakets', 'pakets.id', 'transaksi_details.paket_id')
             ->where('transaksi_id', $transaksi->id)
             ->select(
@@ -203,6 +257,7 @@ class TransaksiController extends Controller
                 'qty',
                 'transaksi_details.harga as harga',
                 'sub_total',
+                'diskon_paket',
                 'keterangan',
             )
             ->get();
@@ -211,6 +266,7 @@ class TransaksiController extends Controller
             'items' => $items,
             'member' => $member,
             'user' => $user,
+            'tambahans' => $tambahans,
             'outlet' => $outlet,
             'transaksi' => $transaksi,
         ]);
@@ -319,26 +375,44 @@ class TransaksiController extends Controller
         return back();
     }
 
+    const ALLOWED_VALUES = ['baru', 'proses', 'selesai', 'diambil', 'batal'];
+
     public function status(Transaksi $transaksi, $status)
     {
-
-        $allowedValues = ['baru', 'proses', 'selesai', 'diambil'];
-
-        if (!in_array($status, $allowedValues)) {
+        // Check if the status is valid and the transaction can be updated
+        if (!in_array($status, self::ALLOWED_VALUES) || !$this->canUpdateStatus($transaksi, $status)) {
             return back()->with('message', 'fail store');
         }
 
-        if ($transaksi->status == 'diambil') {
-            return back()->with('message', 'fail store');
-        } else {
-            $transaksi->update([
-                'status' => $status,
-            ]);
-            LogActivity::add('mengupdate status transaksi ke status ' . $status . '.' . ' Invoice : ' . $transaksi->kode_invoice);
-
-            return back()->with('message', 'success update');
+        // Update the status and the date if needed
+        $transaksi->update(['status' => $status]);
+        if ($status == 'selesai' || $status == 'diambil') {
+            $transaksi->update(['tgl_' . $status => Carbon::now()]);
         }
 
+        // Log the activity
+        LogActivity::add('mengupdate status transaksi ke status ' . $status . '.' . ' Invoice : ' . $transaksi->kode_invoice);
+
+        return back()->with('message', 'success update');
+    }
+
+    // Helper function to check if the transaction can be updated to a given status
+    private function canUpdateStatus(Transaksi $transaksi, $status)
+    {
+        // The transaction cannot be updated if it is already diambil or batal
+        if ($transaksi->status == 'diambil' || $transaksi->status == 'batal') {
+            return false;
+        }
+
+        // The next possible status for each current status
+        $nextStatus = [
+            'baru' => ['proses', 'batal'],
+            'proses' => ['selesai'],
+            'selesai' => ['diambil']
+        ];
+
+        // The transaction can be updated only if the given status is in the next possible status array
+        return in_array($status, $nextStatus[$transaksi->status]);
     }
 
     public function invoice(Transaksi $transaksi)
@@ -354,6 +428,7 @@ class TransaksiController extends Controller
                 'qty',
                 'transaksi_details.harga as harga',
                 'sub_total',
+                'diskon_paket',
                 'keterangan'
             )
             ->get();
