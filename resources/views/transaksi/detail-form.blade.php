@@ -106,7 +106,7 @@
             <div class="form-group row">
                 <label class="col">Biaya Tambahan (Optional)</label>
                 <div class="col">
-                    <x-input-transaksi name="biaya_tambahan" id="biaya_tambahan" :value="$transaksi->biaya_tambahan" />
+                    <x-select-2 name="biaya_tambahan" select="" :opt="$tambahans" :value="$tambahan_details" />
                 </div>
             </div>
             <div class="form-group row">

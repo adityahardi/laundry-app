@@ -141,7 +141,7 @@
                         <div class="form-group row">
                             <label class="col">Diskon Tambahan (Optional)</label>
                             <div class="col">
-                                <x-input-transaksi name="diskon" id="diskon"  />
+                                <x-input-transaksi name="diskon" id="diskon" numeric />
                             </div>
                         </div>
                         <div class="form-group row">
@@ -197,6 +197,7 @@
         let t = parseInt($('#total').val());
         let d = parseInt($('#diskon').val());
         let bt = parseInt($('#biaya_tambahan').val());
+        console.log(bt);
         d = isNaN(d) ? 0 : d;
         bt = isNaN(bt) ? 0 : bt;
         let total = t - d + bt ;

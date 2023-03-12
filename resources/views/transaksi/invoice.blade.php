@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -32,6 +33,7 @@
         }
     </style>
 </head>
+
 <body onload="javascript:window.print()">
     <div class="invoice">
         <h3 class="center">{{ $outlet->nama }}</h3>
@@ -44,12 +46,12 @@
             Tanggal Transaksi : {{ date('d/m/Y', strtotime($transaksi->tgl)) }} <br>
             @if ($transaksi->tgl_bayar == null)
                 Tanggal Bayar : - <br>
-                @else
+            @else
                 Tanggal Bayar : {{ date('d/m/Y H:i:s', strtotime($transaksi->tgl_bayar)) }} <br>
             @endif
             @if ($transaksi->tgl_selesai == null)
                 Tanggal Selesai : - <br>
-                @else
+            @else
                 Tanggal Selesai : {{ date('d/m/Y H:i:s', strtotime($transaksi->tgl_selesai)) }} <br>
             @endif
             Nama Pelanggan : {{ $member->nama }} <br>
@@ -62,16 +64,16 @@
                 <tr>
                     <td>
                         {{ $item->qty }} {{ $item->nama_paket }}
-                        x {{ number_format($item->harga,0,',','.') }} <br>
-                        Diskon : {{ $item->qty }} x {{ number_format($item->diskon_paket,0,',','.') }} <br>
+                        x {{ number_format($item->harga, 0, ',', '.') }} <br>
+                        Diskon : {{ $item->qty }} x {{ number_format($item->diskon_paket, 0, ',', '.') }} <br>
                         <small>Ket : {{ $item->keterangan }}</small>
                     </td>
                     <td class="right">
                         @if ($item->diskon_paket != null)
-                        <del>{{ number_format($item->harga * $item->qty,0,',','.') }}</del>
-                        {{ number_format($item->sub_total,0,',','.') }}
+                            <del>{{ number_format($item->harga * $item->qty, 0, ',', '.') }}</del>
+                            {{ number_format($item->sub_total, 0, ',', '.') }}
                         @else
-                        {{ number_format($item->sub_total,0,',','.') }}
+                            {{ number_format($item->sub_total, 0, ',', '.') }}
                         @endif
                     </td>
                 </tr>
@@ -81,16 +83,20 @@
         <hr>
 
         <p class="right">
-            Sub Total : {{ number_format($transaksi->sub_total,0,',','.') }} <br>
-            Diskon Tambahan : {{ number_format($transaksi->diskon,0,',','.') }} <br>
-            Biaya Tambahan : {{ number_format($transaksi->biaya_tambahan,0,',','.') }}
+            Sub Total : {{ number_format($transaksi->sub_total, 0, ',', '.') }} <br>
+            Diskon Tambahan : {{ number_format($transaksi->diskon, 0, ',', '.') }} <br>
             <br>
-            Pajak PPN(10%) : {{ number_format($transaksi->pajak,0,',','.') }} <br>
-            Total : {{ number_format($transaksi->total_bayar,0,',','.') }}
+            <b>Biaya Tambahan</b> <br>
+            @foreach ($biaya_tambahan as $item)
+                <i>{{ $item->nama }} = {{ number_format($item->harga, 0, ',', '.') }}</i><br>
+            @endforeach
+            <br>
+            Pajak PPN(10%) : {{ number_format($transaksi->pajak, 0, ',', '.') }} <br>
+            Total : {{ number_format($transaksi->total_bayar, 0, ',', '.') }}
             @if ($transaksi->dibayar == 'dibayar')
-            <br>
-                Tunai : {{ number_format($transaksi->cash,0,',','.') }} <br>
-                Kembalian : {{ number_format($transaksi->kembalian,0,',','.') }} <br>
+                <br>
+                Tunai : {{ number_format($transaksi->cash, 0, ',', '.') }} <br>
+                Kembalian : {{ number_format($transaksi->kembalian, 0, ',', '.') }} <br>
             @endif
             @if ($transaksi->dibayar == 'dibayar')
                 <h3 class="center">Terima Kasih</h3>
@@ -102,14 +108,15 @@
                     <i>
                     </i>
                 </small>
-                @else
+            @else
                 <small>
                     <i>
-                    Diambil: {{ date('d-M-Y', strtotime($transaksi->tgl_diambil)) }}
+                        Diambil: {{ date('d-M-Y', strtotime($transaksi->tgl_diambil)) }}
                     </i>
                 </small>
             @endif
         </p>
     </div>
 </body>
+
 </html>
