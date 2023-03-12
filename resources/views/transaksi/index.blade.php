@@ -5,6 +5,9 @@
         <div class="card card-outline card-primary">
             <div class="card-header form-inline">
                 @include('transaksi.add', ['members' => $members])
+                <a class="btn btn-secondary ml-2" href="{{ route('member.create') }}">
+                    <i class="fas fa-plus mr-2"></i> Add Member
+                </a>
                 <x-search/>
             </div>
             <div class="card-body p-0">

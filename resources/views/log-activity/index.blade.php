@@ -14,9 +14,7 @@
                         <i class="fas fa-trash mr-2"></i> Bersihkan Semua Log Aktifitas
                     </button>
                 @endcan
-                <div class="col">
-                    <x-form-search name="nama" />
-                </div>
+                <x-form-search name="nama" />
             </div>
             <div class="card-body p-0">
                 <table class="table table-hover table-striped m-0">

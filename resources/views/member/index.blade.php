@@ -15,7 +15,7 @@
 
         <div class="card card-outline card-primary">
             <div class="card-header form-inline">
-                <x-btn-add :href="route('member.create')"/>
+                <x-btn-add :href="route('member.create')" nama="Member" />
                 <x-search/>
             </div>
             <div class="card-body p-0">

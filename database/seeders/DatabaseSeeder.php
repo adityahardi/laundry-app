@@ -58,12 +58,14 @@ class DatabaseSeeder extends Seeder
                 'nama_paket' => 'Reguler',
                 'harga' => 7000,
                 'jenis' => 'kiloan',
+                'harga_akhir' => 7000,
                 'outlet_id' => 1,
             ],
             [
                 'nama_paket' => 'Bed Cover',
                 'harga' => 5000,
                 'jenis' => 'bed_cover',
+                'harga_akhir' => 5000,
                 'outlet_id' => 1,
             ]
         ]);
@@ -87,6 +89,12 @@ class DatabaseSeeder extends Seeder
                 'alamat' => 'Asgard Blok M ',
                 'tlp' => '019231023898',
             ]
+        ]);
+
+        DB::table('tambahans')->insert([
+            'nama' => 'Ongkir',
+            'harga' => 10000,
+            'outlet_id' => 1,
         ]);
     }
 }

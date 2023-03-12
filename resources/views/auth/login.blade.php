@@ -22,11 +22,12 @@
                 <div class="invalid-feedback d-block">{{ $message }}</div>
                 @enderror
                 <div class="input-group mt-3">
-                    <input name="password" type="password" class="form-control @error('password') is-invalid @enderror"
+                    <input name="password" id="password" type="password" class="form-control @error('password') is-invalid @enderror"
                            placeholder="Password">
                     <div class="input-group-append">
                         <div class="input-group-text">
-                            <span class="fas fa-lock"></span>
+                            {{-- <span class="fas fa-lock"></span> --}}
+                            <span class="fas fa-eye-slash" id="togglePassword"></span>
                         </div>
                     </div>
                 </div>
@@ -48,3 +49,16 @@
         </div>
     </div>
 @endsection
+@push('js')
+    <script>
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#password');
+
+        togglePassword.addEventListener('click', function (e) {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+    </script>
+@endpush

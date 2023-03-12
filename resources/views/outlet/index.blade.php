@@ -15,7 +15,7 @@
 
         <div class="card card-outline card-primary">
             <div class="card-header form-inline">
-                <x-btn-add :href="route('outlet.create')"/>
+                <x-btn-add :href="route('outlet.create')" nama="Outlet" />
                 <x-search/>
             </div>
             <div class="card-body p-0">

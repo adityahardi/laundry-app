@@ -50,7 +50,7 @@ class OutletController extends Controller
     {
         $request->validate([
             'nama' => 'required|max:100',
-            'tlp' => 'required|max:20',
+            'tlp' => 'required|min10|numeric',
             'alamat' => 'required|max:250',
         ], [], [
             'tlp' => 'Telepon',

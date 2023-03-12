@@ -1,6 +1,6 @@
 <div class="input-group">
     <select id="member" style="width: 200px">
-        <option value="">Pilih :</option>
+        <option value="">Pilih Member :</option>
         @foreach ($members as $member)
             <option value="{{ $member->id }}">{{ $member->nama }}</option>
         @endforeach

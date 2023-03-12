@@ -7,6 +7,31 @@
                     {{ date('d/m/Y H:i:s', strtotime($transaksi->tgl)) }}</span>
             </div>
             <div class="form-group">
+                <label>Tanggal Bayar</label>
+                <span class="col"> :
+                    {{ date('d/m/Y H:i:s', strtotime($transaksi->tgl_bayar)) }}</span>
+            </div>
+            <div class="form-group">
+                @if ($transaksi->tgl_selesai == null)
+                    <label>Tanggal Selesai</label>
+                    <span class="col"> : Belum Selesai</span>
+                    @else
+                    <label>Tanggal Selesai</label>
+                    <span class="col"> :
+                        {{ date('d/m/Y H:i:s', strtotime($transaksi->tgl_selesai)) }}</span>
+                @endif
+            </div>
+            <div class="form-group">
+                @if ($transaksi->tgl_diambil == null)
+                    <label>Tanggal Diambil</label>
+                    <span class="col"> : Belum Diambil</span>
+                    @else
+                    <label>Tanggal Diambil</label>
+                    <span class="col"> :
+                        {{ date('d/m/Y H:i:s', strtotime($transaksi->tgl_diambil)) }}</span>
+                @endif
+            </div>
+            <div class="form-group">
                 <label>Batas Waktu</label>
                 <span> :
                     {{ date('d/m/Y H:i:s', strtotime($transaksi->batas_waktu)) }}</span>
@@ -15,10 +40,17 @@
                 <label>Status</label>
                 <span> : {{ ucwords($transaksi->status) }}</span>
             </div>
-            <div class="form-group">
-                <label>Status Dibayar</label>
-                <span> : {{ ucwords(str_replace('_', '  ', $transaksi->dibayar)) }}</span>
-            </div>
+            @if ($transaksi->status == 'batal')
+                <div class="form-group">
+                    <label for="">Status Bayar</label>
+                    <span> : Batal</span>
+                </div>
+            @else
+                <div class="form-group">
+                    <label>Status Bayar</label>
+                    <span> : {{ ucwords( str_replace('_','', $transaksi->dibayar) ) }}</span>
+                </div>
+            @endif
         </div>
         <div class="col-2"></div>
         <div class="col">
@@ -54,20 +86,34 @@
                 <a href="{{ route('transaksi.index') }}" class="btn btn-default mr-2">Kembali</a>
                 <div class="dropdown">
                     @if ($transaksi->status != 'diambil' && $transaksi->dibayar == 'dibayar')
-                        <button class="btn btn-success dropdown-toggle" type="button" data-toggle="dropdown">
-                            Pilih Status Menjadi
-                        </button>
-                        <div class="dropdown-menu">
-                            <?php
-                            $status = [['Proses', 'proses'], ['Selesai', 'selesai'], ['Diambil', 'diambil']];
-                            ?>
-                            @foreach ($status as $row)
-                                <a href="{{ route('transaksi.status', ['transaksi' => $transaksi->id, 'status' => $row[1]]) }}"
-                                    class="dropdown-item">
-                                    {{ $row[0] }}
-                                </a>
-                            @endforeach
-                        </div>
+                    <button class="btn btn-success dropdown-toggle" type="button" data-toggle="dropdown">
+                        Pilih Status Menjadi
+                    </button>
+                    <div class="dropdown-menu">
+                        <?php
+                        $status = [
+                            ['Proses', 'proses'],
+                            ['Selesai', 'selesai'],
+                            ['Diambil', 'diambil']
+                        ];
+                        ?>
+                        @if ($transaksi->status == 'baru')
+                            <a href="{{ route('transaksi.status', ['transaksi' => $transaksi->id, 'status' => 'proses']) }}"
+                               class="dropdown-item">
+                                Proses
+                            </a>
+                        @elseif ($transaksi->status == 'proses')
+                            <a href="{{ route('transaksi.status', ['transaksi' => $transaksi->id, 'status' => 'selesai']) }}"
+                               class="dropdown-item">
+                                Selesai
+                            </a>
+                        @elseif ($transaksi->status == 'selesai')
+                            <a href="{{ route('transaksi.status', ['transaksi' => $transaksi->id, 'status' => 'diambil']) }}"
+                               class="dropdown-item">
+                                Diambil
+                            </a>
+                        @endif
+                    </div>
                     @endif
                 </div>
             </div>

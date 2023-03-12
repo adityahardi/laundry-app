@@ -23,6 +23,8 @@
                 <th>Waktu</th>
                 <th>Nama Kasir</th>
                 <th>Pendapatan</th>
+                <th>Tanggal Bayar</th>
+                <th>Tanggal Diambil</th>
             </tr>
             </thead>
             <tbody>
@@ -36,11 +38,14 @@
                         <td>{{ date('d/m/Y H:i:s', strtotime($row->tgl)) }}</td>
                         <td>{{ $row->kasir }}</td>
                         <td>{{ number_format($row->total_bayar,0,',','.') }}</td>
+                        <td>{{ date('d/m/Y H:i:s', strtotime($row->tgl_bayar)) }}</td>
+                        <td>{{ date('d/m/Y H:i:s', strtotime($row->batas_waktu)) }}</td>
                     </tr>
                 @endforeach
                 <tfoot>
                     <tr class="border-bottom">
                         <th colspan="3" class="text-center">Total</th>
+                        <th></th>
                         <th>{{ number_format($data->sum('total_bayar'),0,',','.') }}</th>
                     </tr>
                 </tfoot>

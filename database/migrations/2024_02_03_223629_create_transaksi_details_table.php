@@ -22,6 +22,7 @@ return new class extends Migration
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
             $table->integer('harga');
+            $table->integer('diskon_paket')->nullable();
             $table->integer('qty');
             $table->integer('sub_total');
             $table->string('keterangan')->nullable();
