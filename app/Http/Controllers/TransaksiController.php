@@ -34,6 +34,8 @@ class TransaksiController extends Controller
             ->when($outlet_id, function ($query, $outlet_id) {
                 return $query->where('transaksis.outlet_id', $outlet_id);
             })
+            ->orderBy('status')
+            ->orderBy('dibayar', 'desc')
             ->orderBy('tgl', 'DESC')
             ->select(
                 'transaksis.id as id',
@@ -75,6 +77,8 @@ class TransaksiController extends Controller
             ->select('tambahans.id as value', DB::raw("CONCAT(tambahans.nama, ' - Rp ', tambahans.harga) as option"))
             ->distinct()
             ->get();
+
+        // return $tambahans;
 
         $items = Cart::session($member->id)->getContent();
 
@@ -246,9 +250,16 @@ class TransaksiController extends Controller
         $user = User::find($transaksi->user_id);
         $member = Member::find($transaksi->member_id);
         $outlet = Outlet::find($transaksi->outlet_id);
+
         $tambahans = Tambahan::where('outlet_id', $outlet->id)
             ->select('id as value', DB::raw("CONCAT(nama, ' - Rp ', harga) as option"))
             ->get();
+
+        $tambahan_details = TambahanDetail::join('tambahans', 'tambahans.id', 'tambahan_details.tambahan_id')
+            ->where('transaksi_id', $transaksi->id)
+            ->select('tambahans.id as value', DB::raw("CONCAT(nama, ' - Rp ', harga) as option"))
+            ->get();
+
         $items = TransaksiDetail::join('pakets', 'pakets.id', 'transaksi_details.paket_id')
             ->where('transaksi_id', $transaksi->id)
             ->select(
@@ -267,23 +278,31 @@ class TransaksiController extends Controller
             'member' => $member,
             'user' => $user,
             'tambahans' => $tambahans,
+            'tambahan_details' => $tambahan_details,
             'outlet' => $outlet,
             'transaksi' => $transaksi,
         ]);
     }
 
-    public function update(Request $request, Transaksi $transaksi)
+    public function update(Request $request, Transaksi $transaksi, TambahanDetail $tambahan_detail)
     {
         $request->validate([
             'diskon' => 'nullable|numeric',
-            'biaya_tambahan' => 'nullable|numeric',
+            'biaya_tambahan' => 'nullable|',
             'uang_tunai' => 'nullable|numeric',
         ]);
 
         $subtotal = $transaksi->sub_total;
         $diskon = $request->diskon;
-        $biaya_tambahan = $request->biaya_tambahan;
-        $total = $subtotal - $diskon + $biaya_tambahan;
+        $biaya_tambahan_ids = $request->biaya_tambahan;
+        $biaya_tambahan_harga = 0;
+
+        if ($biaya_tambahan_ids) {
+            foreach ($biaya_tambahan_ids as $biaya_tambahan_id) {
+                $biaya_tambahan_harga += Tambahan::find($biaya_tambahan_id)->harga;
+            }
+        }
+        $total = $subtotal - $diskon + $biaya_tambahan_harga;
         $pajak = round($total * 10 / 100);
         $total_bayar = $total + $pajak;
         $uang_tunai = $request->uang_tunai;
@@ -297,7 +316,7 @@ class TransaksiController extends Controller
 
         $query_transaksi = [
             'tgl_bayar' => $uang_tunai ? date('Y-m-d H:i:s') : null,
-            'biaya_tambahan' => $biaya_tambahan,
+            'biaya_tambahan' => $biaya_tambahan_harga,
             'diskon' => $diskon,
             'pajak' => $pajak,
             'sub_total' => $subtotal,
@@ -306,6 +325,19 @@ class TransaksiController extends Controller
             'kembalian' => $uang_tunai ? $kembalian : null,
             'dibayar' => $uang_tunai ? 'dibayar' : 'belum_dibayar',
         ];
+
+        $tambahan_detail->where('transaksi_id', $transaksi->id)->delete();
+
+        $tambahan_ids = $request->biaya_tambahan;
+
+        if ($tambahan_ids) {
+            foreach ($tambahan_ids as $tambahan_id) {
+                TambahanDetail::create([
+                    'transaksi_id' => $transaksi->id,
+                    'tambahan_id' => $tambahan_id,
+                ]);
+            }
+        }
 
         LogActivity::add('mengupdate transaksi. Invoice : ' . $transaksi->kode_invoice);
 
@@ -420,6 +452,12 @@ class TransaksiController extends Controller
         $user = User::find($transaksi->user_id);
         $member = Member::find($transaksi->member_id);
         $outlet = Outlet::find($transaksi->outlet_id);
+        $biaya_tambahan = TambahanDetail::join('tambahans', 'tambahans.id', 'tambahan_details.tambahan_id')
+            ->where('tambahan_details.transaksi_id', $transaksi->id)
+            ->select('tambahans.nama', 'tambahans.harga')
+            ->get();
+
+        // return $biaya_tambahan;
         $items = TransaksiDetail::join('pakets', 'pakets.id', 'transaksi_details.paket_id')
             ->where('transaksi_id', $transaksi->id)
             ->select(
@@ -437,6 +475,7 @@ class TransaksiController extends Controller
             'items' => $items,
             'member' => $member,
             'user' => $user,
+            'biaya_tambahan' => $biaya_tambahan,
             'outlet' => $outlet,
             'transaksi' => $transaksi,
         ]);

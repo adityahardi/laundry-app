@@ -22,6 +22,7 @@ class DashboardController extends Controller
         $outlet = Outlet::select(DB::raw('count(id) as jumlah'))->first();
 
         $transaksi = Transaksi::where('dibayar', 'belum_dibayar')
+            ->whereNotIn('status', ['batal'])
             ->when($outlet_id, function ($query, $outlet_id) {
                 return $query->where('outlet_id', $outlet_id);
             })
